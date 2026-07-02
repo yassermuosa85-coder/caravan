@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caravan مكينة المحتوى الذكية V9.3</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #8B5CF6;
+            --accent: #BD1352; 
+            --bg: #000000;
+            --card-bg: #121214;
+            --text: #FFFFFF;
+            --text-muted: #A0A0A5;
+            --border: rgba(255, 255, 255, 0.08);
+            
+            --carousel-bg: #F7F4EB;
+            --carousel-text: #1A1A1A;
+            --carousel-muted: #636366;
+            --carousel-light-pink: #FDF0F5;
+            --carousel-radius: 8px;
+        }
+
+        .noir-mode {
+            --carousel-bg: #0B0B0E;
+            --carousel-text: #FFFFFF;
+            --carousel-muted: #A0A0A5;
+            --carousel-light-pink: #1A0E12;
+            --carousel-radius: 4px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px 15px; overflow-x: hidden; }
+        .container { max-width: 1300px; margin: 0 auto; }
+        
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h1 {
+            font-size: 2.2rem; font-weight: 900;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 5px;
+        }
+        .live-date-badge {
+            display: inline-block; background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #C084FC; padding: 6px 16px; border-radius: 30px; font-size: 0.85rem; font-weight: 700; margin-top: 5px;
+        }
+
+        .ai-generator-panel { background: #13131A; border: 1px solid #2A2A35; border-radius: 14px; padding: 20px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 12px; }
+        .ai-generator-panel h3 { font-size: 1.1rem; font-weight: 900; color: #A855F7; display: flex; align-items: center; gap: 6px; }
+        .ai-row-inputs { display: flex; flex-wrap: wrap; gap: 12px; }
+        .ai-input-text { flex: 2; min-width: 260px; padding: 12px; background: #0A0A0C; border: 1px solid var(--border); border-radius: 8px; color: #FFF; font-size: 0.9rem; }
+        .ai-select-field { flex: 1; min-width: 140px; padding: 12px; background: #0A0A0C; border: 1px solid var(--border); border-radius: 8px; color: #FFF; font-size: 0.9rem; }
+        .ai-trigger-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #A855F7, #7C3AED); color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; }
+        .ai-trigger-btn:disabled { background: #3A3A40; color: #777; cursor: not-allowed; }
+
+        .search-box { margin-bottom: 15px; }
+        .search-box input { width: 100%; padding: 12px 15px; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; color: #fff; font-size: 0.9rem; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(285px, 1fr)); gap: 20px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+        .badge { position: absolute; top: 15px; left: 15px; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; background: var(--accent); color: #fff; }
+        
+        .card-body { margin-top: 30px; flex-grow: 1; }
+        .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+        .card-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 15px; }
+        
+        .card-actions { display: flex; gap: 8px; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center; font-size: 0.85rem; }
+        .btn-solid { background: var(--accent); border: none; color: #fff; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 10px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: #111113; border: 1px solid #222; border-radius: 16px; width: 100%; max-width: 1350px; max-height: 95vh; overflow-y: auto; padding: 20px 15px; position: relative; }
+        .close-modal { position: absolute; top: 15px; left: 15px; background: #222; border: none; color: #fff; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; z-index: 10; }
+        
+        .script-blueprint-section { background: #18181C; border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-top: 40px; margin-bottom: 25px; }
+        .script-slides-list { display: flex; flex-direction: column; gap: 10px; }
+        .script-slide-row { background: #0A0A0C; padding: 12px 15px; border-radius: 6px; border-right: 3px solid var(--primary); font-size: 0.9rem; line-height: 1.6; color: #D1D5DB; }
+
+        .modal-top-bar { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        .action-hub { display: flex; gap: 8px; flex-wrap: wrap; }
+        .hub-btn { flex: 1; padding: 11px 14px; font-weight: 700; font-size: 0.85rem; border-radius: 8px; cursor: pointer; border: none; text-align: center; }
+        .btn-switcher { background: #3A3A3C; color: #FFF; }
+        .btn-export-png { background: #10B981; color: #FFF; }
+
+        .design-section-title { font-size: 1.25rem; font-weight: 900; color: #FFF; margin-top: 25px; margin-bottom: 10px; border-bottom: 1px dashed #222; padding-bottom: 10px; }
+        .slides-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
+        
+        /* قفل أبعاد الكاروسيل الصارم $4\times5$ */
+        .slide-preview-card {
+            width: 100%; max-width: 340px; margin: 0 auto; aspect-ratio: 4 / 5; background: var(--carousel-bg); color: var(--carousel-text); padding: 25px 16px 20px 16px; position: relative; display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--carousel-radius); box-shadow: 0 10px 25px rgba(0,0,0,0.5); overflow: hidden;
+        }
+
+        .slide-progress-bar { position: absolute; top: 12px; left: 16px; right: 16px; display: flex; gap: 4px; }
+        .progress-segment { flex: 1; height: 3.5px; background: #E5E1D8; border-radius: 2px; }
+        .progress-segment.active { background: var(--accent); }
+        .slide-page-num { position: absolute; top: 20px; right: 16px; font-size: 0.7rem; font-weight: 700; color: var(--carousel-muted); }
+        
+        .slide-top-meta { font-size: 0.7rem; font-weight: 700; color: var(--carousel-muted); text-align: center; margin-bottom: 5px; }
+        .slide-center-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; text-align: center; width: 100%; }
+        
+        .slide-heading-bold { font-size: 1.1rem; font-weight: 900; line-height: 1.35; color: inherit; margin-bottom: 5px; word-break: keep-all; }
+        .slide-gradient-word { background: linear-gradient(to left, #F97316, var(--accent), #8B5CF6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        
+        .slide-sub-text { font-size: 0.75rem; font-weight: 600; color: var(--carousel-muted); margin-top: 2px; line-height: 1.4; }
+        .slide-cta-swipe { font-size: 0.7rem; font-weight: 900; color: var(--accent); margin-top: 6px; border-bottom: 2px dashed var(--accent); display: inline-block; align-self: center; padding-bottom: 2px; }
+
+        .sample-list-container { text-align: right; margin-top: 5px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+        .sample-list-item { display: flex; align-items: flex-start; justify-content: flex-start; gap: 6px; font-size: 0.75rem; font-weight: 700; color: inherit; line-height: 1.35; }
+        .sample-list-num { width: 15px; height: 15px; background: var(--accent); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 900; flex-shrink: 0; margin-top: 2px; }
+
+        .quote-box-card { background: var(--accent); color: #FFFFFF; padding: 10px; border-radius: 6px; text-align: center; width: 100%; }
+        .quote-box-card h2 { font-size: 0.8rem !important; line-height: 1.35; color: #FFF !important; font-weight: 700; }
+        .quote-tag-label { background: rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 20px; font-size: 0.6rem; font-weight: 700; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; }
+
+        .avatar-interactive-wrapper { width: 60px; height: 65px; border-radius: 50%; margin: 6px auto 4px auto; border: 2px solid #FFFFFF; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden; display: flex; align-items: center; justify-content: center; background: #E5E1D8; }
+        .avatar-interactive-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .pill-cta-btn { background: var(--accent); color: #FFFFFF; padding: 4px 14px; border-radius: 30px; font-weight: 900; font-size: 0.7rem; display: inline-block; align-self: center; margin-top: 4px; border: none; }
+        .slide-single-username { text-align: center; font-size: 0.75rem; font-weight: 700; color: inherit; margin-top: 2px; }
+
+        @media (min-width: 768px) {
+            body { padding: 30px 20px; } .header h1 { font-size: 2.8rem; }
+            .slides-grid { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 25px; }
+            .slide-preview-card { padding: 40px 24px 25px 24px; max-width: 100%; } 
+        }
+        .toast-container { position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+        .toast { background: #10B981; color: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 0.85rem; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1> Caravan مكينة المحتوى الذكية V9.3</h1>
+        <div class="live-date-badge" id="liveDateDisplay">جاري مزامنة المحرك الفوري المستقر...</div>
+    </div>
+
+    <div class="ai-generator-panel">
+        <h3>🤖 مصنع المواضيع الفوري بالذكاء الاصطناعي والديناميكية الكاملة</h3>
+        <div class="ai-row-inputs">
+            <input type="text" id="aiTopicPrompt" class="ai-input-text" placeholder="اكتب الفكرة هسة (مثال: اخر تحديثات وميزات لتطبيق معين)...">
+            <select id="aiFieldSelect" class="ai-select-field">
+                <option value="انستكرام">انستكرام</option>
+                <option value="تيك توك">تيك توك</option>
+                <option value="دروب شوبنك">دروب شوبنك</option>
+                <option value="ذكاء اصطناعي">الذكاء الاصطناعي</option>
+                <option value="موبايل">موبايل</option>
+                <option value="اخر اخبار التقنية بالعراق">آخر اخبار التقنية بالعراق</option>
+                <option value="اخبار عن احداث العراق">اخبار عن احداث العراق</option>
+            </select>
+        </div>
+        <button class="ai-trigger-btn" id="aiGenBtn" onclick="generateLiveTopicWithAI()">🚀 توليد السكربت والكاروسيل الحقيقي بالـ AI</button>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث عن موضوع تم توليده..." onkeyup="filterNews()">
+    </div>
+
+    <div class="grid" id="newsGrid"></div>
+</div>
+
+<div class="modal-overlay" id="previewModal">
+    <div class="modal" id="modalContainer">
+        <button class="close-modal" onclick="closeModal()">✕</button>
+        
+        <div class="script-blueprint-section">
+            <h3>📝 الخطوة الأولى: معاينة توزيع سكربت جمناي الجديد على الشرائح</h3>
+            <div class="script-slides-list" id="scriptTextListContainer"></div>
+        </div>
+
+        <div class="modal-top-bar">
+            <div class="action-hub">
+                <button class="hub-btn btn-switcher" onclick="toggleCarouselTheme()">🌓 تبديل الثيم (كريمي / نوار)</button>
+                <button class="hub-btn btn-export-png" onclick="exportCarouselToPNG()">📥 تصدير جميع الشرائح المتولدة كـ PNG</button>
+            </div>
+        </div>
+
+        <div class="design-section-title">🎨 الخطوة الثانية: كروت الكاروسيل (أبعاد محمية 4:5 ومقاومة للفيضان)</div>
+        <div class="slides-grid" id="slidesContainer"></div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    // 🔒 قفل وحقن مفتاحك الرسمي بالخلفية للعمل الفوري والمباشر بنظام الاتصال الصافي
+    const LOCKED_SECURE_API_KEY = "AQ.Ab8RN6KzHS2Z8txfMpj4pr3HcgaiF3Ke7rC6xhMPf3kERq-TIQ";
+
+    function initializeLiveDate() {
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('liveDateDisplay').innerText = (new Date()).toLocaleDateString('ar-IQ', options);
+    }
+    window.onload = initializeLiveDate;
+
+    // البرومبت الهندسي المصحح؛ مجبر يكتب محتوى ديناميكي خالص للخبر المطلوب بدون قوالب ثابتة
+    const geminiSystemPromptBlueprint = `You are a viral content creator for the Iraqi digital market in 2026. 
+Generate an authentic, highly detailed script carousel about the user's specific request.
+
+You MUST return strictly a valid, raw JSON array matching this exact design structure:
+[
+  {
+    "title": "عنوان مثير وجديد ومخصص بالكامل عن فكرة المستخدم الحين",
+    "slides": [
+      { "type": "cover", "script": "نص شريحة الغلاف والخطاف باللهجة العراقية", "html": "<div class='slide-top-meta'>تحديثات حية ⚡</div><div class='slide-center-content'><h2 class='slide-heading-bold'>العنوان هنا</h2><h2 class='slide-heading-bold slide-gradient-word'>هسه نزل!</h2><p class='slide-sub-text'>شرح الخطاف المباشر الفرعي</p><span class='slide-cta-swipe'>اسحب كمل 👈</span></div>" },
+      { "type": "list", "script": "تفاصيل ومستجدات الفكرة المطلوبة", "html": "<h2 class='slide-heading-bold' style='text-align:right; color:var(--accent); font-size:1.1rem;'>المستجدات والتفاصيل المكتشفة:</h2><div class='sample-list-container'><div class='sample-list-item'><div class='sample-list-num'>١</div><p>تكتب هنا التفاصيل الحقيقية الجديدة والحصرية عن الموضوع المطلوب الحين بدون أي حشو قديم مكرر</p></div></div>" },
+      { "type": "quote", "script": "اقتباس حاسم مستوحى مباشرة من هذا الموضوع الجديد الحالي", "html": "<div class='slide-center-content'><div class='quote-box-card'><h2>\\\"نص الاقتباس المباشر المخصص للموضوع الحين\\\"</h2><div class='quote-tag-label'>🏷️ احفظها عندك وطبقها</div></div></div>" },
+      { "type": "end", "script": "السؤال التفاعلي القوي الموجه للجمهور", "html": "<div class='slide-center-content'><h2 class='slide-heading-bold'>السؤال التفاعلي الموجه للكومنتات؟</h2><p style='color:var(--accent); font-size:0.8rem;'>اكتبلي رأيك بالكومنتات هسة 👇</p><button class='pill-cta-btn'>تابع @y.tyle +</button><div class='avatar-interactive-wrapper'><img src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=200&q=80'></div><div class='slide-single-username'>@y.tyle</div></div>" }
+    ]
+  }
+]
+
+CRITICAL PRODUCTION RULES:
+1. Wrap everything inside a valid JSON array. Never include markdown wraps. Absolutely NO placeholder template filler text like "زين كاش" or "التجارة بالعراق" unless explicitly requested. Every single text block must be uniquely tailored to the input topic.
+2. The script text and HTML content must be written in localized, clean, and strong Iraqi dialect ("هسه", "اليوم", "شغل").
+3. Protect sizes: HTML font-size inside cards must be tight (1.1rem max for titles) to prevent mobile text overflow. Aspect ratio is locked to 4:5.
+4. Scale dynamically into 4, 5, or 6 slides if the request contains multiple deep rich points.`;
+
+    async function generateLiveTopicWithAI() {
+        const userPrompt = document.getElementById('aiTopicPrompt').value.trim();
+        const selectedField = document.getElementById('aiFieldSelect').value;
+        const genBtn = document.getElementById('aiGenBtn');
+
+        if(!userPrompt) { showToast('❌ اكتب الفكرة أو العنوان الي تريده هسة عيني!'); return; }
+
+        genBtn.disabled = true;
+        genBtn.innerText = '⏳ جاري الاتصال ومعالجة السكربت بالذكاء الاصطناعي...';
+
+        const customInstructions = `Generate a dynamic script array strictly detailing: "${userPrompt}", for category "${selectedField}" for today.`;
+        
+        try {
+            // 🚀 الحل الحاسم: استخدام بروتوكول الـ REST الخالص والموثوق لتجنب قيود الـ SDK والـ CORS بالملف المحلي
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${LOCKED_SECURE_API_KEY}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: geminiSystemPromptBlueprint + "\n\n" + customInstructions }] }]
+                })
+            });
+
+            if(!response.ok) throw new Error('REST API Response error code: ' + response.status);
+
+            const data = await response.json();
+            let aiText = data.candidates[0].content.parts[0].text.trim();
+            
+            // تصفية وقص كود الـ JSON الصافي المستلم ديناميكياً لتجنب مشاكل الالتفاف
+            aiText = aiText.replace(/```json/gi, "").replace(/```/g, "").trim();
+            const startArr = aiText.indexOf('[');
+            const endArr = aiText.lastIndexOf(']');
+            if (startArr !== -1 && endArr !== -1) {
+                aiText = aiText.substring(startArr, endArr + 1);
+            }
+
+            const parsed = JSON.parse(aiText);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                parsed[0].id = "ai_live_" + Math.floor(Math.random() * 100000);
+                parsed[0].cat = "hot";
+                parsed[0].tag = "✨ " + selectedField;
+                
+                activeTopicsDatabase.unshift(parsed[0]);
+                renderDashboardCards();
+                document.getElementById('aiTopicPrompt').value = '';
+                showToast('✨ مبروك عيني ياسر! تم التوليد بنجاح ونزل كارت جديد باللوحة الحين!');
+            }
+        } catch(err) {
+            console.error(err);
+            showToast('❌ حدث خطأ بالاتصال! يرجى إعادة المحاولة الحين.');
+        } finally {
+            genBtn.disabled = false;
+            genBtn.innerText = '🚀 توليد السكربت والكاروسيل الحقيقي بالـ AI';
+        }
+    }
+
+    let activeTopicsDatabase = [
+        {
+            id: "initial_demo", cat: "new", tag: "✨ انستكرام",
+            title: "بانتظار كتابة فكرتك الإخبارية الحية الحين...",
+            slides: [
+                { type: "cover", script: "الغلاف والخطاف: اكتب هسة فكرتك بالصندوق فوق لمشاهدة التفكيك والشرائح الفورية.", html: `<div class="slide-top-meta">نظام صانع المحتوى ⚡</div><div class="slide-center-content"><h2 class="slide-heading-bold">اكتب فكرتك الحية</h2><h2 class="slide-heading-bold slide-gradient-word">بأعلى اللوحة هسة</h2><p class="slide-sub-text">وسيقوم جمناي بالصياغة المباشرة للكاروسيل بالحقائق والتفاصيل الحالية لموضوعك</p></div>` }
+            ]
+        }
+    ];
+
+    function renderDashboardCards() {
+        const grid = document.getElementById('newsGrid');
+        grid.innerHTML = '';
+        activeTopicsDatabase.forEach((item, idx) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <span class="badge">${item.tag}</span>
+                <div class="card-body">
+                    <h2 class="card-title">${item.title}</h2>
+                    <p class="card-desc">${item.slides[0].script}</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-solid" onclick="generateScriptAndCarousel(${idx})">إنشاء سكربت وعرض الكاروسيل</button>
+                </div>`;
+            grid.appendChild(card);
+        });
+    }
+
+    function generateScriptAndCarousel(index) {
+        const topic = activeTopicsDatabase[index];
+        if(!topic) return;
+
+        const scriptContainer = document.getElementById('scriptTextListContainer');
+        const designContainer = document.getElementById('slidesContainer');
+        const finalLength = topic.slides.length;
+
+        scriptContainer.innerHTML = '';
+        designContainer.innerHTML = '';
+
+        topic.slides.forEach((slide, idx) => {
+            const row = document.createElement('div');
+            row.className = 'script-slide-row';
+            row.innerHTML = `<strong>الشريحة ${idx+1}:</strong> ${slide.script}`;
+            scriptContainer.appendChild(row);
+
+            const cardEl = document.createElement('div');
+            cardEl.className = 'slide-preview-card';
+            
+            let barHTML = '<div class="slide-progress-bar">';
+            for(let i = 1; i <= finalLength; i++) {
+                barHTML += `<div class="progress-segment ${i <= (idx + 1) ? 'active' : ''}"></div>`;
+            }
+            barHTML += '</div>';
+
+            const isLast = (idx === finalLength - 1);
+            const footerHTML = isLast ? '' : `<div class="slide-footer-tag">@y.tyle</div>`;
+
+            cardEl.innerHTML = `
+                ${barHTML}
+                <div class="slide-page-num">${finalLength}/${idx + 1}</div>
+                <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:center; width:100%;">
+                    ${slide.html}
+                </div>
+                ${footerHTML}`;
+                
+            designContainer.appendChild(cardEl);
+        });
+
+        document.getElementById('previewModal').classList.add('active');
+    }
+
+    async function exportCarouselToPNG() {
+        showToast('📥 جاري التقاط الكروت المصلحة وحفظها بدقة حادة عالية...');
+        const slides = document.querySelectorAll('.slide-preview-card');
+        for (let i = 0; i < slides.length; i++) {
+            const canvas = await html2canvas(slides[i], { scale: 2, useCORS: true });
+            const link = document.createElement('a');
+            link.download = `y_tyle_Slide_${i + 1}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+        showToast('🎯 تم تصدير جميع كروت الأخبار بنجاح عيني ياسر!');
+    }
+
+    function filterNews() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('#newsGrid .card').forEach(card => {
+            const title = card.querySelector('.card-title').innerText.toLowerCase();
+            card.style.display = title.includes(query) ? 'flex' : 'none';
+        });
+    }
+
+    function toggleCarouselTheme() { document.getElementById('modalContainer').classList.toggle('noir-mode'); }
+    function closeModal() { document.getElementById('previewModal').classList.remove('active'); }
+    function showToast(msg) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = msg;
+        container.appendChild(toast); setTimeout(() => toast.remove(), 3000);
+    }
+
+    renderDashboardCards();
+</script>
+
+</body>
+</html>
